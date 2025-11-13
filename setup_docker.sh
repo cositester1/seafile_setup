@@ -3,26 +3,18 @@ set -euo pipefail
 
 source ./config.sh
 
-# --- Load credentials ---
-if [ -f "passwords.sh" ]; then
-    echo "🔑 Loading credentials from passwords.sh"
-    source ./passwords.sh
-else
-    echo "⚠️ passwords.sh not found. Prompting for credentials..."
-    # --- Prompt for credentials if not set ---
-    if [ -z "${DB_ROOT_PASSWORD:-}" ]; then
-        read -rsp "Enter the root password for the database: " DB_ROOT_PASSWORD
-        echo
-    fi
-    if [ -z "${SEAFILE_ADMIN_EMAIL:-}" ]; then
-        read -rp "Enter the email address for the Seafile admin: " SEAFILE_ADMIN_EMAIL
-    fi
-    if [ -z "${SEAFILE_ADMIN_PASSWORD:-}" ]; then
-        read -rsp "Enter the password for the Seafile admin: " SEAFILE_ADMIN_PASSWORD
-        echo
-    fi
+# --- Prompt for credentials if not set ---
+if [ -z "${DB_ROOT_PASSWORD:-}" ]; then
+    read -rsp "Enter the root password for the database: " DB_ROOT_PASSWORD
+    echo
 fi
-
+if [ -z "${SEAFILE_ADMIN_EMAIL:-}" ]; then
+    read -rp "Enter the email address for the Seafile admin: " SEAFILE_ADMIN_EMAIL
+fi
+if [ -z "${SEAFILE_ADMIN_PASSWORD:-}" ]; then
+    read -rsp "Enter the password for the Seafile admin: " SEAFILE_ADMIN_PASSWORD
+    echo
+fi
 
 # --- Generate docker-compose.yml from template ---
 echo "📄 Generating docker-compose.yml from template..."
