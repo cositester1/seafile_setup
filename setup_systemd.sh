@@ -1,8 +1,7 @@
 #!/bin/bash
 set -euo pipefail
 
-SERVICE_FILE="/etc/systemd/system/seafile-docker.service"
-WORKDIR="/opt/seafile"
+source ./config.sh
 
 echo "🔧 Creating systemd service..."
 
@@ -16,7 +15,7 @@ Requires=docker.service
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-WorkingDirectory=$WORKDIR
+WorkingDirectory=$SEAFILE_DIR
 ExecStart=/usr/bin/docker compose up -d
 ExecStop=/usr/bin/docker compose down
 TimeoutStartSec=0
