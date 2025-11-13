@@ -20,4 +20,10 @@ export NGINX_ENABLED="/etc/nginx/sites-enabled/seafile.conf"
 # Systemd service file path
 export SERVICE_FILE="/etc/systemd/system/seafile-docker.service"
 
+# --- Passwords ---
+# Import passwords if available
+if [ -f passwords.sh ]; then
+  source passwords.sh
+fi
+
 echo "✅ Configuration loaded for $SEAFILE_HOSTNAME"
