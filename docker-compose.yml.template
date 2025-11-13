@@ -1,0 +1,115 @@
+#
+# Seafile Docker Compose template
+#
+# This file is a template. The setup script will generate the final
+# docker-compose.yml file from this template.
+#
+# The following placeholders will be replaced by the setup script:
+#   {{SEAFILE_HOSTNAME}}       - The hostname of the Seafile server.
+#   {{DB_ROOT_PASSWORD}}       - The root password for the MariaDB database.
+#   {{SEAFILE_ADMIN_EMAIL}}    - The email address of the Seafile admin user.
+#   {{SEAFILE_ADMIN_PASSWORD}} - The password of the Seafile admin user.
+#   {{SEAFILE_SERVER_IMAGE}}   - The Docker image for the Seafile server.
+#   {{SEAHUB_IMAGE}}           - The Docker image for Seahub.
+#   {{SEAHUB_MEDIA_IMAGE}}     - The Docker image for Seahub media.
+#   {{MARIADB_IMAGE}}          - The Docker image for MariaDB.
+#   {{MEMCACHED_IMAGE}}        - The Docker image for Memcached.
+#   {{SEAFILE_CADDY_IMAGE}}    - The Docker image for the Seafile Caddy server.
+#
+version: '3.8'
+services:
+  seafile-server:
+    image: {{SEAFILE_SERVER_IMAGE}}
+    volumes:
+      - seafile-data:/shared
+    environment:
+      - DB_HOST=db
+      - DB_ROOT_PASSWD={{DB_ROOT_PASSWORD}}
+      - TIME_ZONE=Europe/Berlin
+      - HTTPS=true
+      - SEAFILE_URL={{SEAFILE_HOSTNAME}} # Mandatory on first deployment!
+    networks:
+      - seafile-net
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "8082"]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  seahub:
+    image: {{SEAHUB_IMAGE}}
+    volumes:
+      - seafile-data:/shared
+      - seahub-avatars:/shared/seafile/seahub-data/avatars
+      - seahub-custom:/shared/seafile/seahub-data/custom
+    environment:
+      - SEAFILE_ADMIN_EMAIL={{SEAFILE_ADMIN_EMAIL}}
+      - SEAFILE_ADMIN_PASSWORD={{SEAFILE_ADMIN_PASSWORD}}
+    networks:
+      - seafile-net
+    depends_on:
+      db:
+        condition: service_healthy
+      seafile-server:
+        condition: service_healthy
+    restart: unless-stopped
+
+  seahub-media:
+    image: {{SEAHUB_MEDIA_IMAGE}}
+    volumes:
+      - seahub-avatars:/usr/share/caddy/media/avatars
+      - seahub-custom:/usr/share/caddy/media/custom
+    networks:
+      - seafile-net
+    restart: unless-stopped
+
+  db:
+    image: {{MARIADB_IMAGE}}
+    environment:
+      - MYSQL_ROOT_PASSWORD={{DB_ROOT_PASSWORD}}
+      - MYSQL_LOG_CONSOLE=true
+      - MARIADB_AUTO_UPGRADE=true
+    volumes:
+      - seafile-mariadb:/var/lib/mysql
+    networks:
+      - seafile-net
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--su-mysql", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+
+  memcached:
+    image: {{MEMCACHED_IMAGE}}
+    entrypoint: memcached -m 1024
+    networks:
+      - seafile-net
+    restart: unless-stopped
+
+  seafile-caddy:
+    image: {{SEAFILE_CADDY_IMAGE}}
+    ports:
+      - "80:80" # Point your reverse proxy to port 80 of this service
+    networks:
+      - seafile-net
+      - default
+    restart: unless-stopped
+
+networks:
+  seafile-net:
+    internal: true
+
+volumes:
+  seafile-data:
+    name: seafile-data
+  seafile-mariadb:
+    name: seafile-mariadb
+  seahub-avatars:
+    name: seahub-avatars
+  seahub-custom:
+    name: seahub-custom
