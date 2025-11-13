@@ -1,10 +1,10 @@
-# Seafile Docker Setup Scripts
+# Seafile Docker Setup Script
 
-This repository contains a set of shell scripts to automate the setup of a Seafile server using Docker, Nginx, and a self-signed SSL certificate for local HTTPS.
+This repository contains a shell script to automate the setup of a Seafile server using Docker, closely following the official Seafile Docker deployment guide.
 
 ## Prerequisites
 
-- A Debian-based Linux distribution (e.g., Ubuntu, Debian).
+- Docker and Docker Compose installed on your system.
 - `sudo` privileges.
 
 ## Quick Start
@@ -16,10 +16,10 @@ This repository contains a set of shell scripts to automate the setup of a Seafi
     ```
 
 2.  **Configure the setup:**
-    Open the `config.sh` file and customize the variables, especially `SEAFILE_HOSTNAME`, to match your environment.
+    Open the `config.sh` file and customize the `SEAFILE_HOSTNAME` and `SEAFILE_DIR` variables to match your environment.
 
 3.  **Set up credentials (Optional, for non-interactive setup):**
-    For a non-interactive setup (e.g., in automated scripts), you can provide your credentials in a `passwords.sh` file.
+    For a non-interactive setup, you can provide your credentials in a `passwords.sh` file.
 
     - Copy the example file:
       ```bash
@@ -29,22 +29,20 @@ This repository contains a set of shell scripts to automate the setup of a Seafi
 
 4.  **Run the setup script:**
     ```bash
-    chmod +x *.sh
+    chmod +x setup.sh
     sudo ./setup.sh
     ```
-    If you did not create a `passwords.sh` file, the script will prompt you to enter the necessary passwords during the setup process.
+    If you did not create a `passwords.sh` file, the script will prompt you for the necessary credentials.
 
 ## How It Works
 
-The `setup.sh` script orchestrates the entire process by calling the other scripts in the correct order:
+The `setup.sh` script automates the following steps:
+1.  **Sources Configuration:** Loads settings from `config.sh` and `passwords.sh`.
+2.  **Checks Prerequisites:** Verifies that Docker and Docker Compose are installed.
+3.  **Prompts for Credentials:** Asks for any missing passwords if `passwords.sh` is not used.
+4.  **Creates Directories:** Ensures the necessary data directories for Seafile and its database exist.
+5.  **Generates Compose File:** Creates a `docker-compose.yml` file from the official template, substituting your configured values.
+6.  **Ensures a Clean Start:** Runs `docker-compose down --volumes` to remove any previous Seafile containers, networks, and volumes.
+7.  **Starts Seafile:** Executes `docker-compose up -d` to launch the Seafile server.
 
-1.  `setup_prerequisites.sh`: Installs Docker, Docker Compose, Nginx, and other required packages.
-2.  `setup_certificate.sh`: Generates a self-signed SSL certificate for the configured hostname using `mkcert`.
-3.  `setup_nginx.sh`: Configures Nginx as a reverse proxy for the Seafile services.
-4.  `setup_docker.sh`:
-    - Prompts for credentials if `passwords.sh` is not found.
-    - Generates the `docker-compose.yml` file from the template.
-    - Starts the Seafile Docker containers.
-5.  `setup_systemd.sh`: Creates and enables a systemd service to manage the Seafile Docker containers.
-
-After the setup is complete, you can access your Seafile instance at `https://<your-hostname>`.
+After the setup is complete, you can access your Seafile instance at `http://<your-hostname>`.
