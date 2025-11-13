@@ -56,10 +56,11 @@ server {
 EOF
 fi
 
-ln -sf "$NGINX_CONF" "$NGINX_ENABLED"
+# The following lines are commented out to prevent Nginx from starting and
+# conflicting with the Caddy container on port 80.
+# ln -sf "$NGINX_CONF" "$NGINX_ENABLED"
+# nginx -t || { echo "❌ Nginx configuration test failed"; exit 1; }
+# systemctl reload nginx || echo "⚠️ Nginx reload failed, maybe first install"
 
-nginx -t || { echo "❌ Nginx configuration test failed"; exit 1; }
-systemctl reload nginx || echo "⚠️ Nginx reload failed, maybe first install"
-
-echo "✅ Nginx configured."
+echo "✅ Nginx configured, but not enabled, to avoid port conflicts with Docker."
 
