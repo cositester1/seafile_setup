@@ -56,10 +56,10 @@ server {
 EOF
 fi
 
-ln -sf "$NGINX_CONF" "$NGINX_ENABLED"
+# Stop Nginx to prevent it from running and conflicting with the
+# Caddy container on port 80 for the current installation.
+echo "🛑 Stopping Nginx service to prevent port conflicts..."
+systemctl stop nginx || true
 
-nginx -t || { echo "❌ Nginx configuration test failed"; exit 1; }
-systemctl reload nginx || echo "⚠️ Nginx reload failed, maybe first install"
-
-echo "✅ Nginx configured."
+echo "✅ Nginx is stopped to avoid port conflicts with Docker for this session."
 

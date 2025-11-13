@@ -10,7 +10,6 @@
 #   {{SEAFILE_ADMIN_EMAIL}}    - The email address of the Seafile admin user.
 #   {{SEAFILE_ADMIN_PASSWORD}} - The password of the Seafile admin user.
 #
-version: '3.8'
 services:
   seafile-server:
     image: ggogel/seafile-server:11.0.13
