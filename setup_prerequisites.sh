@@ -1,6 +1,14 @@
 #!/bin/bash
 set -euo pipefail
 
+source ./config.sh
+
+# --- Check for Debian-based OS ---
+if ! command -v dpkg >/dev/null; then
+    echo "❌ This script is intended for Debian-based systems only."
+    exit 1
+fi
+
 echo "📦 Installing prerequisites and Docker CE..."
 
 apt update -y || { echo "❌ Apt update failed"; exit 1; }
