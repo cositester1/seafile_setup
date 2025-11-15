@@ -1,11 +1,12 @@
-# Seafile Docker Setup Scripts
+# Seafile Docker Setup
 
-This repository contains a set of shell scripts to automate the setup of a Seafile server using Docker, Nginx, and a self-signed SSL certificate for local HTTPS.
+This repository contains a simplified set of scripts to automate the setup of a Seafile server using Docker.
 
 ## Prerequisites
 
 - A Debian-based Linux distribution (e.g., Ubuntu, Debian).
 - `sudo` privileges.
+- The following commands installed: `docker`, `docker-compose`, and `openssl`.
 
 ## Quick Start
 
@@ -16,35 +17,25 @@ This repository contains a set of shell scripts to automate the setup of a Seafi
     ```
 
 2.  **Configure the setup:**
-    Open the `config.sh` file and customize the variables, especially `SEAFILE_HOSTNAME`, to match your environment.
+    - Create a `config.env` file from the `config.env.example` file and customize the variables, especially `SEAFILE_HOSTNAME`, to match your environment.
+    - Create a `passwords.env` file from the `passwords.env.example` file and provide your desired credentials. This file is ignored by git, so your secrets are safe.
 
-3.  **Set up credentials (Optional, for non-interactive setup):**
-    For a non-interactive setup (e.g., in automated scripts), you can provide your credentials in a `passwords.sh` file.
-
-    - Copy the example file:
-      ```bash
-      cp passwords.sh.example passwords.sh
-      ```
-    - Edit `passwords.sh` and replace the placeholder values with your actual credentials. This file is ignored by git, so your secrets are safe.
-
-4.  **Run the setup script:**
+3.  **Run the setup script:**
     ```bash
     chmod +x *.sh
     sudo ./setup.sh
     ```
-    If you did not create a `passwords.sh` file, the script will prompt you to enter the necessary passwords during the setup process.
+    The script will check for prerequisites, generate a self-signed SSL certificate, and start the Seafile Docker containers.
 
-## How It Works
+4.  **Access your Seafile instance:**
+    After the setup is complete, you can access your Seafile instance at `https://<your-hostname>`.
 
-The `setup.sh` script orchestrates the entire process by calling the other scripts in the correct order:
+## Teardown
 
-1.  `setup_prerequisites.sh`: Installs Docker, Docker Compose, Nginx, and other required packages.
-2.  `setup_certificate.sh`: Generates a self-signed SSL certificate for the configured hostname using `mkcert`.
-3.  `setup_nginx.sh`: Configures Nginx as a reverse proxy for the Seafile services.
-4.  `setup_docker.sh`:
-    - Prompts for credentials if `passwords.sh` is not found.
-    - Generates the `docker-compose.yml` file from the template.
-    - Starts the Seafile Docker containers.
-5.  `setup_systemd.sh`: Creates and enables a systemd service to manage the Seafile Docker containers.
+To completely remove the Seafile Docker environment, including all data, run the `teardown.sh` script:
 
-After the setup is complete, you can access your Seafile instance at `https://<your-hostname>`.
+```bash
+sudo ./teardown.sh
+```
+
+This will stop and remove the Docker containers, volumes, and networks associated with this setup.
